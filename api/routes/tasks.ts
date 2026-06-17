@@ -164,7 +164,7 @@ router.post(
       return
     }
 
-    if (task.status !== 'open') {
+    if (task.status !== 'open' && task.status !== 'in_progress') {
       res.status(400).json({
         success: false,
         message: '任务不可加入',

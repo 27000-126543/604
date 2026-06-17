@@ -119,7 +119,7 @@ export default function TaskHall() {
 
   const participantCount = selectedTask?.participants?.length ?? 0
   const isFull = selectedTask ? participantCount >= selectedTask.required_people : false
-  const canJoin = selectedTask?.status === 'open' && !isFull
+  const canJoin = (selectedTask?.status === 'open' || selectedTask?.status === 'in_progress') && !isFull
   const alreadyJoined = selectedTask?.participants?.some((p) => p.user_id === user?.id)
   const taskStatus = selectedTask ? statusLabelMap[selectedTask.status] : null
 
@@ -210,7 +210,7 @@ export default function TaskHall() {
             variant: 'secondary',
           },
           {
-            label: alreadyJoined ? '已参与' : isFull ? '名额已满' : selectedTask?.status !== 'open' ? '不可参与' : '参与任务',
+            label: alreadyJoined ? '已参与' : isFull ? '名额已满' : (selectedTask?.status !== 'open' && selectedTask?.status !== 'in_progress') ? '不可参与' : '参与任务',
             onClick: handleJoin,
             variant: 'primary',
             disabled: !canJoin || joining || !!alreadyJoined,
@@ -297,10 +297,21 @@ export default function TaskHall() {
                           加入于 {dayjs(p.joined_at).format('YYYY-MM-DD HH:mm')}
                         </p>
                       </div>
-                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                        {p.status === 'joined' && '参与中'}
-                        {p.status === 'completed' && '已完成'}
-                        {p.status === 'expired' && '已过期'}
+                      <span className={cn('text-xs px-2 py-1 rounded-full', 
+                        p.proof_submission?.status === 'pending' ? 'bg-warning/10 text-warning' :
+                        p.proof_submission?.status === 'approved' ? 'bg-success/10 text-success' :
+                        p.proof_submission?.status === 'rejected' ? 'bg-danger/10 text-danger' :
+                        p.status === 'completed' ? 'bg-success/10 text-success' :
+                        p.status === 'expired' ? 'bg-gray-100 text-gray-600' :
+                        'bg-primary/10 text-primary'
+                      )}>
+                        {p.proof_submission?.status === 'pending' && '待审核'}
+                        {p.proof_submission?.status === 'approved' && '已通过'}
+                        {p.proof_submission?.status === 'rejected' && '已拒绝'}
+                        {!p.proof_submission && p.status === 'joined' && '参与中'}
+                        {!p.proof_submission && p.status === 'submitted' && '待审核'}
+                        {!p.proof_submission && p.status === 'completed' && '已完成'}
+                        {!p.proof_submission && p.status === 'expired' && '已过期'}
                       </span>
                     </div>
                   ))}

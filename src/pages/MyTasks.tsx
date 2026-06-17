@@ -191,24 +191,43 @@ export default function MyTasks() {
                   {task.participants && task.participants.length > 0 && (
                     <div className="pt-4 border-t border-gray-100">
                       <p className="text-sm text-gray-500 mb-3 font-medium">参与者列表</p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="space-y-3">
                         {task.participants.map(p => {
                           const proofStatus = p.proof_submission?.status;
                           const StatusIcon = proofStatus ? proofStatusMap[proofStatus as keyof typeof proofStatusMap].icon : null;
                           return (
                             <div
                               key={p.id}
-                              className="flex items-center gap-2 bg-gray-light px-3 py-1.5 rounded-full"
+                              className="bg-gray-light rounded-xl p-4"
                             >
-                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                                <User className="w-3.5 h-3.5 text-primary" />
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <User className="w-3.5 h-3.5 text-primary" />
+                                </div>
+                                <span className="text-sm font-medium text-gray-700">{p.user?.username}</span>
+                                {proofStatus && StatusIcon && (
+                                  <span className={cn('px-1.5 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-0.5', proofStatusMap[proofStatus as keyof typeof proofStatusMap].color)}>
+                                    <StatusIcon className="w-3 h-3" />
+                                    {proofStatusMap[proofStatus as keyof typeof proofStatusMap].label}
+                                  </span>
+                                )}
+                                {!proofStatus && (
+                                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium border bg-gray-200 text-gray-600 border-gray-300">
+                                    参与中
+                                  </span>
+                                )}
                               </div>
-                              <span className="text-sm text-gray-700">{p.user?.username}</span>
-                              {proofStatus && StatusIcon && (
-                                <span className={cn('px-1.5 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-0.5', proofStatusMap[proofStatus as keyof typeof proofStatusMap].color)}>
-                                  <StatusIcon className="w-3 h-3" />
-                                  {proofStatusMap[proofStatus as keyof typeof proofStatusMap].label}
-                                </span>
+                              {p.proof_submission?.proof_content && (
+                                <div className="bg-white rounded-lg p-3 mb-2">
+                                  <p className="text-xs text-gray-500 mb-1 font-medium">提交的凭证</p>
+                                  <p className="text-sm text-gray-700">{p.proof_submission.proof_content}</p>
+                                </div>
+                              )}
+                              {proofStatus === 'rejected' && p.proof_submission?.reject_reason && (
+                                <div className="bg-danger/5 rounded-lg p-3 border border-danger/10">
+                                  <p className="text-xs text-danger font-medium mb-1">拒绝原因</p>
+                                  <p className="text-sm text-danger/80">{p.proof_submission.reject_reason}</p>
+                                </div>
                               )}
                             </div>
                           );
